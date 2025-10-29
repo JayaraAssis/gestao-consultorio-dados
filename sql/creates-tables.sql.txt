@@ -15,8 +15,10 @@ nome_medico VARCHAR2(50) NOT NULL,
 cpf_medico VARCHAR2(11) NOT NULL, 
 tel_medico NUMBER(11) NOT NULL, 
 id_consul_medico NUMBER(3) NOT NULL, 
+especialidade_medico VARCHAR2(25),
 CONSTRAINT fk_consultorio FOREIGN KEY (id_consul_medico) REFERENCES consultorio(id_consultorio) 
 );
+
 
 
 CREATE TABLE pacientes( 
@@ -36,7 +38,10 @@ dt_consulta DATE NOT NULL,
 id_consul_consulta NUMBER(3) NOT NULL, 
 id_med_consulta NUMBER(5) NOT NULL, 
 id_pac_consulta NUMBER(6) NOT NULL, 
+valor consulta NUMBER(5,2) NOT NULL,
+observação VARCHAR2(200) NOT NULL,
 CONSTRAINT fk_consul_consulta FOREIGN KEY (id_consul_consulta) REFERENCES consultorio(id_consultorio), 
 CONSTRAINT fk_med_consulta FOREIGN KEY (id_med_consulta) REFERENCES medicos(id_medico), 
 CONSTRAINT fk_pac_consulta FOREIGN KEY (id_pac_consulta) REFERENCES pacientes(id_paciente) 
-)
+);
+
