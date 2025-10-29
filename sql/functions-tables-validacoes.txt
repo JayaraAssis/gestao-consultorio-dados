@@ -1,3 +1,6 @@
+-- -- Ordem de cadastro das funções: 1-cadastrar_consultorio / 2-cadastrar_medicos / 3-cadastrar_pacientes / 4-cadastrar_consulta
+
+
 -- Cadastrando consultório e fazendo validações simples
 
 FUNCTION cadastrar_consultorio ( 
