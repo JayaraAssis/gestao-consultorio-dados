@@ -1,3 +1,5 @@
+-- Ordem da criação de tabelas: 1-consultorio / 2-medicos / 3-pacientes / 4-consultas
+
 create table consultorio ( 
 id_consultorio NUMBER(3) PRIMARY KEY, 
 nome_consultorio VARCHAR2(30) NOT NULL, 
