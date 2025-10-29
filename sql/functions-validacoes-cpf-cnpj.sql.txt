@@ -1,3 +1,5 @@
+-- Ordem de execução das validações: 1-validar_cnpj / 2-validar_cpf
+
 --Fazendo validação de CPF com cálculo do dígito verificador
 
 FUNCTION validar_cpf( 
