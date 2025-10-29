@@ -72,9 +72,9 @@ Exemplos reais já implementados ✅
 
 - Consultas por período
 
-➡ códigos completos estão em 06-analytics-queries.sql
-➡ Diagrama Entidade Relacionamento (docs/diagrama-er.png)
+➡ códigos completos estão em 06-analytics-queries.sql ✅
 ➡ prints dos resultados serão adicionados em breve ✅
+➡ Diagrama Entidade Relacionamento (docs/diagrama-er.png) ✅
 
 ** Como Executar o Projeto **
 ✅ No Oracle Live SQL
@@ -119,4 +119,5 @@ Scripts automatizados de carga
 
 ⭐ Se gostou do projeto, não esqueça de marcar com uma estrela no GitHub!
 Ajuda muito o meu crescimento na área! 
+
 
