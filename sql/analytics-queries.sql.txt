@@ -1,0 +1,35 @@
+-- Para fazer qual médico teve mais atendimento
+
+SELECT m.NOME_MEDICO, COUNT(*) AS total_consultas 
+FROM CONSULTAS c 
+JOIN MEDICOS m ON c.ID_MED_CONSULTA = m.ID_MEDICO 
+GROUP BY m.NOME_MEDICO 
+ORDER BY total_consultas DESC;
+
+
+-- Para saber o número de consultas realizadas por cada paciente
+
+SELECT p.NOME_PACIENTE, COUNT(*) AS consultas_realizadas 
+FROM CONSULTAS c 
+JOIN PACIENTES p ON c.ID_PAC_CONSULTA = p.ID_PACIENTE 
+GROUP BY p.NOME_PACIENTE 
+ORDER BY consultas_realizadas DESC;
+
+
+-- Para saber o faturamento de cada mês
+
+SELECT 
+  TO_CHAR(DT_CONSULTA, 'MM/YYYY') AS mes_ano, 
+  SUM(VALOR_CONSULTA) AS faturamento 
+FROM CONSULTAS 
+GROUP BY TO_CHAR(DT_CONSULTA, 'MM/YYYY') 
+ORDER BY mes_ano;
+
+
+-- Para saber o total de consultas por especialidade
+
+SELECT m.ESPECIALIDADE_MEDICO, COUNT(*) AS total 
+FROM CONSULTAS c 
+JOIN MEDICOS m ON c.ID_MED_CONSULTA = m.ID_MEDICO 
+GROUP BY m.ESPECIALIDADE_MEDICO 
+ORDER BY total DESC

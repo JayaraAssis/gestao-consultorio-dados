@@ -1,0 +1,92 @@
+--Fazendo validação de CPF com cálculo do dígito verificador
+
+FUNCTION validar_cpf( 
+    p_cpf VARCHAR2 
+) RETURN BOOLEAN IS  
+soma NUMBER := 0; 
+resto NUMBER; 
+BEGIN 
+     
+    FOR i IN 1..9 LOOP 
+        soma := soma + TO_NUMBER(SUBSTR(p_cpf, i, 1)) * (11 - i); 
+    END LOOP; 
+    resto := (soma * 10) MOD 11; 
+    IF resto = 10 THEN resto := 0; END IF; 
+    IF resto != TO_NUMBER(SUBSTR(p_cpf, 10, 1)) THEN 
+        RETURN FALSE; 
+    END IF; 
+ 
+    soma := 0; 
+ 
+    FOR i IN 1..10 LOOP 
+        soma := soma + TO_NUMBER(SUBSTR(p_cpf, i, 1)) * (12 - i); 
+    END LOOP; 
+    resto := (soma * 10) MOD 11; 
+    IF resto = 10 THEN resto := 0; END IF; 
+    IF resto != TO_NUMBER(SUBSTR(p_cpf, 11, 1)) THEN 
+        RETURN FALSE; 
+    END IF; 
+ 
+    RETURN TRUE; 
+END;/
+
+
+
+
+
+-- Fazendo validação de CNPJ com cálculo do dígito verificador
+
+FUNCTION validar_cnpj(p_cnpj_consultorio VARCHAR2) 
+RETURN BOOLEAN 
+IS 
+  v_cnpj VARCHAR2(14); 
+  v_soma NUMBER := 0; 
+  v_digito1 NUMBER; 
+  v_digito2 NUMBER; 
+  v_pesos1 CONSTANT SYS.ODCINUMBERLIST := SYS.ODCINUMBERLIST(5,4,3,2,9,8,7,6,5,4,3,2); 
+  v_pesos2 CONSTANT SYS.ODCINUMBERLIST := SYS.ODCINUMBERLIST(6,5,4,3,2,9,8,7,6,5,4,3,2); 
+BEGIN 
+  v_cnpj := REGEXP_REPLACE(p_cnpj_consultorio, '[^0-9]', ''); 
+ 
+  IF LENGTH(v_cnpj) != 14 THEN 
+    RETURN FALSE; 
+  END IF; 
+ 
+  IF v_cnpj IN ('00000000000000','11111111111111','22222222222222', 
+                '33333333333333','44444444444444','55555555555555', 
+                '66666666666666','77777777777777','88888888888888', 
+                '99999999999999') THEN 
+    RETURN FALSE; 
+  END IF; 
+ 
+  v_soma := 0; 
+  FOR i IN 1..12 LOOP 
+    v_soma := v_soma + TO_NUMBER(SUBSTR(v_cnpj, i, 1)) * v_pesos1(i); 
+  END LOOP; 
+ 
+  v_digito1 := MOD(v_soma, 11); 
+  IF v_digito1 < 2 THEN 
+    v_digito1 := 0; 
+  ELSE 
+    v_digito1 := 11 - v_digito1; 
+  END IF; 
+ 
+  IF v_digito1 != TO_NUMBER(SUBSTR(v_cnpj, 13, 1)) THEN 
+    RETURN FALSE; 
+  END IF; 
+ 
+  v_soma := 0; 
+  FOR i IN 1..13 LOOP 
+    v_soma := v_soma + TO_NUMBER(SUBSTR(v_cnpj, i, 1)) * v_pesos2(i); 
+  END LOOP; 
+ 
+  v_digito2 := MOD(v_soma, 11); 
+  IF v_digito2 < 2 THEN 
+    v_digito2 := 0; 
+  ELSE 
+    v_digito2 := 11 - v_digito2; 
+  END IF; 
+ 
+  RETURN v_digito2 = TO_NUMBER(SUBSTR(v_cnpj, 14, 1)); 
+END; 
+ /

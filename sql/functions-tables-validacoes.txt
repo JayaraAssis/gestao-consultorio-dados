@@ -1,0 +1,318 @@
+-- Cadastrando consultório e fazendo validações simples
+
+FUNCTION cadastrar_consultorio ( 
+    p_id_consultorio NUMBER, 
+    p_nome_consultorio VARCHAR2, 
+    p_cnpj_consultorio VARCHAR2, 
+    p_tel_consultorio NUMBER, 
+    p_end_consultorio VARCHAR2 
+) RETURN BOOLEAN IS  
+    v_count NUMBER; 
+    BEGIN 
+    	IF p_id_consultorio IS NULL OR p_id_consultorio <= 0 THEN  
+    		DBMS_OUTPUT.PUT_LINE ('ERRO: ID do consultório está vazio ou é <= 0.'); RETURN FALSE; END IF; 
+ 
+		SELECT COUNT(*) INTO v_count 
+    	FROM consultorio WHERE id_consultorio = p_id_consultorio; 
+ 
+		IF v_count > 0 THEN 
+        	DBMS_OUTPUT.PUT_LINE ('ERRO: ID de consultório já cadastrado.'); RETURN FALSE; END IF; 
+ 
+		IF p_nome_consultorio IS NULL OR LENGTH(p_nome_consultorio) < 5 THEN  
+            DBMS_OUTPUT.PUT_LINE ('ERRO: Nome do consultório está vazio ou é < 5.'); RETURN FALSE; END IF; 
+ 
+		IF p_end_consultorio IS NULL OR LENGTH(p_end_consultorio) < 5 THEN  
+            DBMS_OUTPUT.PUT_LINE ('ERRO: Endereço do consultório está vazio ou é < 5.'); RETURN FALSE; END IF; 
+ 
+		IF p_cnpj_consultorio IS NULL THEN 
+        	DBMS_OUTPUT.PUT_LINE ('ERRO: O CNPJ não pode ser nulo.'); RETURN FALSE; END IF; 
+ 
+		IF LENGTH(p_cnpj_consultorio) <> 14 OR NOT REGEXP_LIKE(p_cnpj_consultorio, '^[0-9]+$') THEN 
+        	DBMS_OUTPUT.PUT_LINE ('ERRO: CNPJ inválido. Deve conter exatamente 14 dígitos numéricos.'); RETURN FALSE; END IF; 
+ 
+		SELECT COUNT(*) INTO v_count 
+    	FROM consultorio WHERE cnpj_consultorio = p_cnpj_consultorio; 
+ 
+		IF v_count > 0 THEN 
+        	DBMS_OUTPUT.PUT_LINE ('ERRO: CNPJ já cadastrado para outro consultório.'); RETURN FALSE; END IF; 
+ 
+		IF p_tel_consultorio IS NULL OR LENGTH(p_tel_consultorio) <> 11 THEN 
+        	DBMS_OUTPUT.PUT_LINE ('ERRO: O telefone deve ser informado (11 dígitos).'); RETURN FALSE; END IF; 
+ 
+		INSERT INTO consultorio (id_consultorio, nome_consultorio, cnpj_consultorio, tel_consultorio, end_consultorio ) 
+            VALUES(p_id_consultorio, p_nome_consultorio, p_cnpj_consultorio, p_tel_consultorio, p_end_consultorio); 
+ 
+		IF SQL%ROWCOUNT > 0 THEN 
+            COMMIT; 
+            DBMS_OUTPUT.PUT_LINE('Cadastro concluído com sucesso.'); RETURN TRUE;  
+		ELSE 
+            DBMS_OUTPUT.PUT_LINE('ERRO: Não foi possível concluir o cadastro.'); RETURN FALSE; END IF; 
+ 
+    END;/
+
+
+
+-- Cadastrando médicos e fazendo validações simples (usando a função validar_cpf)
+
+FUNCTION cadastrar_medicos( 
+    p_id_medico NUMBER, 
+    p_nome_medico VARCHAR2, 
+    p_cpf_medico VARCHAR2, 
+    p_tel_medico NUMBER, 
+    p_id_consul_medico NUMBER, 
+    p_especialidade_medico VARCHAR2 
+) RETURN BOOLEAN IS 
+    v_count NUMBER; 
+    v_ok BOOLEAN; 
+BEGIN 
+     
+    IF p_id_medico IS NULL OR p_id_medico <= 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: ID do médico vazio ou <= 0.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    SELECT COUNT(*) INTO v_count FROM medicos WHERE id_medico = p_id_medico; 
+    IF v_count > 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: ID já cadastrado.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+     
+    IF p_nome_medico IS NULL OR LENGTH(p_nome_medico) < 5 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Nome vazio ou < 5 dígitos.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    v_ok := validar_cpf(p_cpf_medico); 
+    IF NOT v_ok THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: CPF do médico inválido.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    SELECT COUNT(*) INTO v_count FROM MEDICOS WHERE CPF_MEDICO = p_cpf_medico; 
+    IF v_count > 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: CPF já cadastrado para outro médico.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    IF p_tel_medico IS NULL OR p_tel_medico < 11 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Telefone não pode ser vazio e deve conter 11 dígitos.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    SELECT COUNT(*) INTO v_count FROM CONSULTORIO WHERE ID_CONSULTORIO = p_id_consul_medico; 
+    IF v_count = 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Consultório informado não existe.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    IF p_especialidade_medico IS NULL THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: A especialidade é obrigatória.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    INSERT INTO medicos (id_medico, nome_medico, cpf_medico, tel_medico, id_consul_medico, especialidade_medico) 
+        VALUES ( 
+        p_id_medico, 
+        p_nome_medico, 
+        p_cpf_medico, 
+        p_tel_medico, 
+        p_id_consul_medico, 
+        p_especialidade_medico 
+    ); 
+ 
+	IF SQL%ROWCOUNT > 0 THEN 
+    COMMIT; 
+    	DBMS_OUTPUT.PUT_LINE('Médico cadastrado com sucesso!'); 
+    RETURN TRUE; 
+	ELSE 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Não foi possível realizar o cadastro do médico.'); 
+        RETURN FALSE; END IF; 
+ 
+EXCEPTION 
+    WHEN OTHERS THEN 
+        DBMS_OUTPUT.PUT_LINE('Erro inesperado: ' || SQLERRM); 
+        RETURN FALSE; 
+END; /
+
+
+-- Cadastrando pacientes e fazendo validações simples (usando a função validar_cpf)
+
+FUNCTION cadastrar_pacientes ( 
+    p_id_paciente NUMBER, 
+    p_nome_paciente VARCHAR2, 
+    p_cpf_paciente VARCHAR2, 
+    p_dt_nasc_paciente DATE, 
+    p_tel_paciente NUMBER, 
+    p_id_consul_paciente NUMBER 
+) RETURN BOOLEAN IS 
+    v_count NUMBER := 0; 
+    v_ok_cpf BOOLEAN; 
+BEGIN 
+     
+    IF p_id_paciente IS NULL OR p_id_paciente <= 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: ID do paciente está vazio ou é <= 0.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    SELECT COUNT(*) INTO v_count FROM PACIENTES WHERE ID_PACIENTE = p_id_paciente; 
+    IF v_count > 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: ID do paciente já cadastrado.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    IF p_nome_paciente IS NULL OR LENGTH(TRIM(p_nome_paciente)) < 5 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Nome do paciente está vazio ou é < 5.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    IF p_cpf_paciente IS NULL THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: O CPF não pode ser nulo.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+     
+    v_ok_cpf := validar_cpf(p_cpf_paciente); 
+    IF NOT v_ok_cpf THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: CPF inválido (dígito verificador).'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    SELECT COUNT(*) INTO v_count FROM PACIENTES WHERE CPF_PACIENTE = p_cpf_paciente; 
+    IF v_count > 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: CPF já cadastrado para outro paciente.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    IF p_dt_nasc_paciente IS NULL OR p_dt_nasc_paciente > SYSDATE THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Data de nascimento não pode ser vazia ou com data futura.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+     
+    IF p_tel_paciente IS NULL OR LENGTH(TO_CHAR(p_tel_paciente)) <> 11 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: O telefone deve ser informado (11 dígitos).'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    IF p_id_consul_paciente IS NULL OR p_id_consul_paciente <= 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: ID do consultório está vazio ou é <= 0.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+     
+    INSERT INTO PACIENTES (ID_PACIENTE, NOME_PACIENTE, CPF_PACIENTE, DT_NASC_PACIENTE, TEL_PACIENTE, ID_CONSUL_PACIENTE) 
+    VALUES (p_id_paciente, p_nome_paciente, p_cpf_paciente, p_dt_nasc_paciente, p_tel_paciente, p_id_consul_paciente); 
+ 
+    IF SQL%ROWCOUNT > 0 THEN 
+        COMMIT; 
+        DBMS_OUTPUT.PUT_LINE('Cadastro do paciente concluído com sucesso.'); 
+        RETURN TRUE; 
+    ELSE 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Não foi possível concluir o cadastro.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+EXCEPTION 
+    WHEN OTHERS THEN 
+        ROLLBACK; 
+        DBMS_OUTPUT.PUT_LINE('ERRO INESPERADO: ' || SQLERRM); 
+        RETURN FALSE; 
+END; /
+
+
+-- Cadastrando consultas e fazendo validações simples
+
+FUNCTION cadastrar_consultas ( 
+    p_id_consulta NUMBER, 
+    p_dt_consulta DATE, 
+    p_id_consul NUMBER, 
+    p_id_medico NUMBER, 
+    p_id_paciente NUMBER, 
+    p_valor NUMBER, 
+    p_obs VARCHAR2 
+) RETURN BOOLEAN IS 
+    v_count NUMBER; 
+    v_id_consul_med NUMBER; 
+    v_id_consul_pac NUMBER; 
+BEGIN 
+ 
+    IF p_id_consulta IS NULL OR p_id_consulta <= 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: ID da consulta vazio ou <= 0.'); 
+        RETURN FALSE; 
+    END IF; 
+     
+    SELECT COUNT(*) INTO v_count 
+    FROM CONSULTAS WHERE ID_CONSULTA = p_id_consulta; 
+    IF v_count > 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: ID da consulta já existe.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+     
+    SELECT COUNT(*) INTO v_count  
+    FROM consultorio WHERE id_consultorio = p_id_consul; 
+    IF v_count = 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Consultório não existe.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+     
+    SELECT COUNT(*) INTO v_count  
+    FROM medicos WHERE id_medico = p_id_medico; 
+    IF v_count = 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Médico não existe.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+     
+    SELECT COUNT(*) INTO v_count  
+    FROM pacientes WHERE id_paciente = p_id_paciente; 
+    IF v_count = 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Paciente não existe.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    SELECT id_consul_medico INTO v_id_consul_med 
+    FROM medicos WHERE id_medico = p_id_medico; 
+ 
+    IF v_id_consul_med != p_id_consul THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Médico não pertence ao consultório informado.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    SELECT id_consul_paciente INTO v_id_consul_pac 
+    FROM pacientes WHERE id_paciente = p_id_paciente; 
+ 
+    IF v_id_consul_pac != p_id_consul THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Paciente não pertence ao consultório informado.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    IF p_dt_consulta < DATE '2000-01-01' THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Data da consulta inválida.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    IF p_valor <= 0 THEN 
+        DBMS_OUTPUT.PUT_LINE('ERRO: O valor deve ser maior que zero.'); 
+        RETURN FALSE; 
+    END IF; 
+ 
+    INSERT INTO CONSULTAS ( id_consulta, dt_consulta, id_consul_consulta, id_med_consulta, id_pac_consulta, valor_consulta, observacao)  
+        VALUES ( p_id_consulta, p_dt_consulta, p_id_consul, p_id_medico, p_id_paciente, p_valor, p_obs); 
+ 
+     
+	IF SQL%ROWCOUNT > 0 THEN 
+	COMMIT; 
+    DBMS_OUTPUT.PUT_LINE('Consulta cadastrada com sucesso!'); 
+    RETURN TRUE; 
+	ELSE 
+        DBMS_OUTPUT.PUT_LINE('ERRO: Não foi possível cadastrar a consulta.'); 
+		RETURN FALSE; END IF; 
+ 
+EXCEPTION 
+    WHEN OTHERS THEN 
+        DBMS_OUTPUT.PUT_LINE('Erro inesperado: ' || SQLERRM); 
+        RETURN FALSE; 
+END; /

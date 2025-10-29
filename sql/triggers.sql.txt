@@ -1,0 +1,51 @@
+-- Trigger para garantir a inserção de CPF do médico válido
+
+
+CREATE OR REPLACE TRIGGER trg_validar_cpf_medico   
+BEFORE INSERT OR UPDATE ON MEDICOS   
+FOR EACH ROW   
+DECLARE   
+  v_ok BOOLEAN;   
+BEGIN   
+  v_ok := validar_cpf(:NEW.CPF_MEDICO);   
+   
+  IF NOT v_ok THEN   
+    RAISE_APPLICATION_ERROR(-20004, 'CPF inválido para médico. Operação cancelada.');   
+  END IF;   
+END;
+
+
+-- Trigger para garantir a inserção de CPF do paciente válido
+
+CREATE OR REPLACE TRIGGER trg_validar_cpf_paciente   
+BEFORE INSERT OR UPDATE ON PACIENTES   
+FOR EACH ROW   
+DECLARE   
+    v_ok BOOLEAN;   
+BEGIN   
+    IF :NEW.CPF_PACIENTE IS NULL THEN   
+        RAISE_APPLICATION_ERROR(-20002, 'CPF não pode ser nulo.');   
+    END IF;   
+   
+    v_ok := validar_cpf(:NEW.CPF_PACIENTE);   
+   
+    IF NOT v_ok THEN   
+        RAISE_APPLICATION_ERROR(-20001, 'CPF inválido. Verifique o número informado.');   
+    END IF;   
+END;
+
+
+-- Trigger para garantir a inserção de CNPJ do consultório válido
+
+CREATE OR REPLACE TRIGGER trg_validar_cnpj_consultorio 
+BEFORE INSERT OR UPDATE ON CONSULTORIO 
+FOR EACH ROW 
+DECLARE 
+  v_ok BOOLEAN; 
+BEGIN 
+  v_ok := validar_cnpj(:NEW.CNPJ_CONSULTORIO); 
+ 
+  IF NOT v_ok THEN 
+    RAISE_APPLICATION_ERROR(-20002, 'CNPJ inválido. Cadastro cancelado.'); 
+  END IF; 
+END; 
