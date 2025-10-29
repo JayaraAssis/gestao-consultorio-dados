@@ -1,3 +1,5 @@
+-- Ordem para executar as Triggers: 1-trg_validar_cnpj_consultorio / 2-trg_validar_cpf_medico / 3-trg_validar_cpf_paciente
+
 -- Trigger para garantir a inserção de CPF do médico válido
 
 
