@@ -1,3 +1,5 @@
+-- -- Ordem de inserção: 1-consultorio / 2-medicos / 3-pacientes / 4-consultas
+
 -- Inserindo valores na tabela consultorio
 
 INSERT ALL  
