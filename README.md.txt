@@ -73,6 +73,7 @@ Exemplos reais já implementados ✅
 - Consultas por período
 
 ➡ códigos completos estão em 06-analytics-queries.sql
+➡ Diagrama Entidade Relacionamento (docs/diagrama-er.png)
 ➡ prints dos resultados serão adicionados em breve ✅
 
 ** Como Executar o Projeto **
@@ -118,3 +119,4 @@ Scripts automatizados de carga
 
 ⭐ Se gostou do projeto, não esqueça de marcar com uma estrela no GitHub!
 Ajuda muito o meu crescimento na área! 
+
