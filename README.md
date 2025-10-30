@@ -91,7 +91,7 @@ Exemplos reais já implementados ✅
 06-analytics-queries.sql
 
 
-# IMPORTANTE:
+IMPORTANTE:
 
 As triggers e FKs impedirão inserções inválidas — comportamento esperado ✅
 
