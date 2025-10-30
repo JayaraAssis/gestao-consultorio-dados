@@ -73,7 +73,7 @@ Exemplos reais já implementados ✅
 - Consultas por período
 
 ➡ códigos completos estão em 06-analytics-queries.sql ✅
-➡ prints dos resultados serão adicionados em breve ✅
+➡ prints dos resultados  ✅
 ➡ Diagrama Entidade Relacionamento (docs/diagrama-er.png) ✅
 
 ** Como Executar o Projeto **
@@ -109,13 +109,7 @@ Estudante de Tecnologia com foco em Banco de Dados
 
 🚀 Próximas melhorias
 
-Inserção de mais dados para análises avançadas
-
-Diagrama ER completo e estilizado (em breve)
-
-Views para simplificar relatórios
-
-Scripts automatizados de carga
+Inserção de mais registros/dados para análises avançadas
 
 ⭐ Se gostou do projeto, não esqueça de marcar com uma estrela no GitHub!
 Ajuda muito o meu crescimento na área! 
