@@ -3,55 +3,42 @@
 
 -- Cadastrando consultório e fazendo validações simples
 
-CREATE OR REPLACE FUNCTION cadastrar_consultorio ( 
-    p_id_consultorio NUMBER, 
-    p_nome_consultorio VARCHAR2, 
-    p_cnpj_consultorio VARCHAR2, 
-    p_tel_consultorio NUMBER, 
-    p_end_consultorio VARCHAR2 
-) RETURN BOOLEAN IS  
-    v_count NUMBER; 
+CREATE OR REPLACE PROCEDURE p_cadastrar_consultorio ( 
+    p_id_consultorio IN NUMBER, 
+    p_nome_consultorio IN VARCHAR2, 
+    p_cnpj_consultorio IN VARCHAR2, 
+    p_tel_consultorio IN NUMBER, 
+    p_end_consultorio IN VARCHAR2 
+) IS  
+    v_count NUMBER;
+    v_validacao BOOLEAN := TRUE;  
     BEGIN 
-    	IF p_id_consultorio IS NULL OR p_id_consultorio <= 0 THEN  
-    		DBMS_OUTPUT.PUT_LINE ('ERRO: ID do consultório está vazio ou é <= 0.'); RETURN FALSE; END IF; 
+    	IF verificar_campo_number('ID Consultorio', p_id_consultorio) = FALSE THEN v_validacao := FALSE; END IF; 
  
-		SELECT COUNT(*) INTO v_count 
-    	FROM consultorio WHERE id_consultorio = p_id_consultorio; 
+		IF verificar_campo_varchar('Nome consultório', p_nome_consultorio) = FALSE THEN v_validacao := FALSE; END IF; 
  
-		IF v_count > 0 THEN 
-        	DBMS_OUTPUT.PUT_LINE ('ERRO: ID de consultório já cadastrado.'); RETURN FALSE; END IF; 
+		IF verificar_campo_varchar('Endereço consultório', p_end_consultorio)= FALSE THEN v_validacao := FALSE; END IF; 
  
-		IF p_nome_consultorio IS NULL OR LENGTH(p_nome_consultorio) < 5 THEN  
-            DBMS_OUTPUT.PUT_LINE ('ERRO: Nome do consultório está vazio ou é < 5.'); RETURN FALSE; END IF; 
+		IF verificar_campo_varchar('CNPJ consultório', p_cnpj_consultorio) = FALSE THEN v_validacao := FALSE; END IF; 
  
-		IF p_end_consultorio IS NULL OR LENGTH(p_end_consultorio) < 5 THEN  
-            DBMS_OUTPUT.PUT_LINE ('ERRO: Endereço do consultório está vazio ou é < 5.'); RETURN FALSE; END IF; 
- 
-		IF p_cnpj_consultorio IS NULL THEN 
-        	DBMS_OUTPUT.PUT_LINE ('ERRO: O CNPJ não pode ser nulo.'); RETURN FALSE; END IF; 
- 
-		IF LENGTH(p_cnpj_consultorio) <> 14 OR NOT REGEXP_LIKE(p_cnpj_consultorio, '^[0-9]+$') THEN 
-        	DBMS_OUTPUT.PUT_LINE ('ERRO: CNPJ inválido. Deve conter exatamente 14 dígitos numéricos.'); RETURN FALSE; END IF; 
- 
-		SELECT COUNT(*) INTO v_count 
-    	FROM consultorio WHERE cnpj_consultorio = p_cnpj_consultorio; 
- 
-		IF v_count > 0 THEN 
-        	DBMS_OUTPUT.PUT_LINE ('ERRO: CNPJ já cadastrado para outro consultório.'); RETURN FALSE; END IF; 
- 
-		IF p_tel_consultorio IS NULL OR LENGTH(p_tel_consultorio) <> 11 THEN 
-        	DBMS_OUTPUT.PUT_LINE ('ERRO: O telefone deve ser informado (11 dígitos).'); RETURN FALSE; END IF; 
+		IF verificar_campo_number ('Telefone', p_tel_consultorio) = FALSE THEN v_validacao := FALSE; END IF;
+
+		IF v_validacao = TRUE THEN
  
 		INSERT INTO consultorio (id_consultorio, nome_consultorio, cnpj_consultorio, tel_consultorio, end_consultorio ) 
             VALUES(p_id_consultorio, p_nome_consultorio, p_cnpj_consultorio, p_tel_consultorio, p_end_consultorio); 
  
 		IF SQL%ROWCOUNT > 0 THEN 
             COMMIT; 
-            DBMS_OUTPUT.PUT_LINE('Cadastro concluído com sucesso.'); RETURN TRUE;  
+            DBMS_OUTPUT.PUT_LINE('Cadastro concluído com sucesso.'); 
 		ELSE 
-            DBMS_OUTPUT.PUT_LINE('ERRO: Não foi possível concluir o cadastro.'); RETURN FALSE; END IF; 
+            DBMS_OUTPUT.PUT_LINE('ERRO: Não foi possível concluir o cadastro.'); END IF; 
+
+	ELSE 
+        DBMS_OUTPUT.PUT_LINE('Erro de validação.'); 
+END IF;
  
-    END;/
+    END;
 
 
 
@@ -319,3 +306,4 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Erro inesperado: ' || SQLERRM); 
         RETURN FALSE; 
 END; /
+
