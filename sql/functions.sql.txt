@@ -92,3 +92,41 @@ BEGIN
   RETURN v_digito2 = TO_NUMBER(SUBSTR(v_cnpj, 14, 1)); 
 END; 
  /
+
+
+
+
+
+Validações usadas nas procedures:
+
+Para verificar campo VARCHAR:
+
+CREATE OR REPLACE FUNCTION verificar_campo_varchar( 
+ p_nome_campo VARCHAR2, 
+ p_valor_campo VARCHAR2 
+) RETURN BOOLEAN IS 
+BEGIN 
+    IF p_valor_campo IS NULL OR LENGTH(p_valor_campo) < 0 THEN  
+    DBMS_OUTPUT.PUT_LINE(p_nome_campo ||'Quantidade de caracteres = 0 ou nulo');  
+	RETURN FALSE; 
+	ELSE 
+        RETURN TRUE; 
+    END IF;  
+END;
+
+
+
+Para verificar campo NUMBER:
+
+CREATE OR REPLACE FUNCTION verificar_campo_number( 
+ p_nome_campo VARCHAR2, 
+ p_valor_campo NUMBER 
+) RETURN BOOLEAN IS 
+BEGIN 
+    IF p_valor_campo IS NULL OR p_valor_campo < 0 THEN  
+    DBMS_OUTPUT.PUT_LINE(p_nome_campo ||'É negativo ou nulo');  
+	RETURN FALSE; 
+	ELSE 
+        RETURN TRUE; 
+    END IF;  
+END;
